@@ -1,8 +1,7 @@
-name: libgoldilocks build
+name: libgoldilocks pipeline
 on: [push, pull_request]
 jobs:
   build:
-    name: Build
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
@@ -19,3 +18,39 @@ jobs:
       with:
         name: libgoldilocks
         path: build/lib/*.*
+  release:
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Load Release URL File from release job
+      uses: actions/download-artifact@v1
+      with:
+        name: libgoldilocks
+    - name: Bump version
+      id: version_bump
+      uses: anothrNick/github-tag-action@1.13.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEFAULT_BUMP: "patch"
+        RELEASE_BRANCHES: "master"
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.version_bump.outputs.tag }}
+        release_name: Release libgoldilocks ${{ steps.version_bump.outputs.tag }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: libgoldilocks
+        asset_name: libgoldilocks
+        asset_content_type: application/zip
