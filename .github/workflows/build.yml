@@ -1,0 +1,47 @@
+name: libgoldilocks pipeline
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Build
+      run: |
+        autoreconf --install
+        ./configure
+        make lib
+    - name: Test
+      run: make test
+    - name: Zip
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      run: zip -r -j libgoldilocks build/lib
+    - name: Bump version
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      id: version_bump
+      uses: anothrNick/github-tag-action@1.13.0
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DEFAULT_BUMP: "patch"
+        RELEASE_BRANCHES: "master"
+    - name: Create Release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ steps.version_bump.outputs.tag }}
+        release_name: Release libgoldilocks ${{ steps.version_bump.outputs.tag }}
+        draft: false
+        prerelease: false
+    - name: Upload Release Asset
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: libgoldilocks.zip
+        asset_name: libgoldilocks.zip
+        asset_content_type: application/zip
