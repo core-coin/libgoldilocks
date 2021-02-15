@@ -14,8 +14,10 @@ jobs:
     - name: Test
       run: make test
     - name: Zip
-      run: zip -r libgoldilocks build/lib
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+      run: zip -r -j libgoldilocks build/lib
     - name: Bump version
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       id: version_bump
       uses: anothrNick/github-tag-action@1.13.0
       env:
@@ -23,6 +25,7 @@ jobs:
         DEFAULT_BUMP: "patch"
         RELEASE_BRANCHES: "master"
     - name: Create Release
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -33,11 +36,12 @@ jobs:
         draft: false
         prerelease: false
     - name: Upload Release Asset
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: libgoldilocks.zip
-        asset_name: libgoldilocks
+        asset_name: libgoldilocks.zip
         asset_content_type: application/zip
