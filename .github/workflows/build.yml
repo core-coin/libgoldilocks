@@ -14,16 +14,9 @@ jobs:
       run: |
         autoreconf --install
         ./configure
-        make lib
-  deploy:
-    name: Deploy
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v1
+        make lib && make test
     - name: Artifact
       uses: actions/upload-artifact@v2
       with:
-        name: my-artifact
-        path: path/to/artifact/world.txt
+        name: libgoldilocks
+        path: build/lib/.
