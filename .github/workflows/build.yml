@@ -10,12 +10,11 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v1
-    - name: Autoreconf
-      run: autoreconf --install
-    - name: Configure
-      run: ./configure
-    - name: Make lib
-      run: make lib
+    - name: Build
+      run: |
+        autoreconf --install
+        ./configure
+        make lib
   deploy:
     name: Deploy
     runs-on: ubuntu-latest
