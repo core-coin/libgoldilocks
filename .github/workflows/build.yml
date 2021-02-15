@@ -1,0 +1,30 @@
+name: libgoldilocks build
+on: [push, pull_request]
+jobs:
+  build:
+    name: Build
+    strategy:
+      matrix:
+        platform: [ubuntu-latest]
+    runs-on: ${{ matrix.platform }}
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Autoreconf
+      run: autoreconf --install
+    - name: Configure
+      run: ./configure
+    - name: Make lib
+      run: make lib
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Artifact
+      uses: actions/upload-artifact@v2
+      with:
+        name: my-artifact
+        path: path/to/artifact/world.txt
