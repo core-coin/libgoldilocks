@@ -16,8 +16,9 @@ jobs:
       run: |
         autoreconf --install
         ./configure
-        make lib
+        make all
     - name: Test
+      if: false
       run: make test
     - name: Zip
       if: github.event_name == 'push' && github.ref == 'refs/heads/master'
