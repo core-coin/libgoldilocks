@@ -55,7 +55,7 @@ LANGXXFLAGS = -fno-strict-aliasing
 GENFLAGS = -ffunction-sections -fdata-sections -fvisibility=hidden -fomit-frame-pointer -fPIC
 OFLAGS ?= -Os
 
-MACOSX_VERSION_MIN ?= 10.9
+MACOSX_VERSION_MIN ?= 10.15
 ifeq ($(UNAME),Darwin)
 GENFLAGS += -mmacosx-version-min=$(MACOSX_VERSION_MIN)
 endif
@@ -153,7 +153,7 @@ $(BUILD_LIB)/libgoldilocks.so: $(BUILD_LIB)/libgoldilocks.so.1
 $(BUILD_LIB)/libgoldilocks.so.1: $(LIBCOMPONENTS)
 	rm -f $@
 ifeq ($(UNAME),Darwin)
-	libtool -macosx_version_min $(MACOSX_VERSION_MIN) -dynamic -dead_strip -lc -x -o $@ \
+	libtool -macosx_version_min $(MACOSX_VERSION_MIN) -static -dead_strip -x -o $@ \
 		  $(LIBCOMPONENTS)
 else ifeq ($(UNAME),SunOS)
 	$(LD) $(LDFLAGS) -shared -Wl,-soname,`basename $@` -o $@ $(LIBCOMPONENTS)
