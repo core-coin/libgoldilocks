@@ -4,7 +4,6 @@
  */
 
 #include "f_field.h"
-#include <stdint.h>
 
 void gf_mul (gf_s *__restrict__ cs, const gf as, const gf bs) {
     const uint64_t *a = as->limb, *b = bs->limb;
