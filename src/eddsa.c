@@ -327,3 +327,198 @@ goldilocks_error_t goldilocks_ed448_verify_prehash (
 
     return ret;
 }
+
+// =========================================================================
+// Derives secretKey from privateKey
+// =========================================================================
+
+void goldilocks_ed448_private_to_secretkey (
+    uint8_t secretkey[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES],
+    const uint8_t privkey[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES]
+) {
+
+    {
+        // Hash (SHAKE256) the privateKey and write first half to secretKey
+
+        hash_hash(
+            secretkey,
+            GOLDILOCKS_EDDSA_448_PRIVATE_BYTES,
+            privkey,
+            GOLDILOCKS_EDDSA_448_PRIVATE_BYTES
+        );
+
+// Sets bits due to EdDSA standard
+
+        clamp(secretkey);
+
+    }
+}
+
+// =========================================================================
+// Signing using secretkey and seed (which is used to get nonce)
+// =========================================================================
+
+void goldilocks_ed448_sign_with_secretkey_and_prenonce (
+    uint8_t signature[GOLDILOCKS_EDDSA_448_SIGNATURE_BYTES],
+    const uint8_t secretkey[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES],
+    const uint8_t seed[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES],
+    const uint8_t pubkey[GOLDILOCKS_EDDSA_448_PUBLIC_BYTES],
+    const uint8_t *message,
+    size_t message_len,
+    uint8_t prehashed,
+    const uint8_t *context,
+    uint8_t context_len
+) {
+    API_NS(scalar_p) secret_scalar;
+    hash_ctx_p hash;
+    API_NS(scalar_p) nonce_scalar;
+    uint8_t nonce_point[GOLDILOCKS_EDDSA_448_PUBLIC_BYTES] = {0};
+    API_NS(scalar_p) challenge_scalar;
+
+    {
+        // Deserialize secretKey to scalar form
+        API_NS(scalar_decode_long)(secret_scalar, secretkey, GOLDILOCKS_EDDSA_448_PRIVATE_BYTES);
+
+        // Create string by concatenation Dom4 || seed || message
+        hash_init_with_dom(hash,prehashed,0,context,context_len);
+        hash_update(hash,seed,GOLDILOCKS_EDDSA_448_PRIVATE_BYTES);
+        hash_update(hash,message,message_len);
+    }
+
+    /* Decode the nonce */
+    {
+        // Hash the string
+        uint8_t nonce[2*GOLDILOCKS_EDDSA_448_PRIVATE_BYTES];
+        hash_final(hash,nonce,sizeof(nonce));
+	// Deserialize it as nonce_scalar
+        API_NS(scalar_decode_long)(nonce_scalar, nonce, sizeof(nonce));
+        goldilocks_bzero(nonce, sizeof(nonce));
+    }
+
+    {
+        unsigned int c;
+        API_NS(point_p) p;
+        /* Scalarmul to create the nonce-point */
+	// Divedes nonce_scalar by 4
+        API_NS(scalar_p) nonce_scalar_2;
+        API_NS(scalar_halve)(nonce_scalar_2,nonce_scalar);
+        for (c = 2; c < GOLDILOCKS_448_EDDSA_ENCODE_RATIO; c <<= 1) {
+            API_NS(scalar_halve)(nonce_scalar_2,nonce_scalar_2);
+        }
+
+        // Multiplication of nonce_scalar and base point: [nonce_scalar]B
+        API_NS(precomputed_scalarmul)(p,API_NS(precomputed_base),nonce_scalar_2);
+        API_NS(point_mul_by_ratio_and_encode_like_eddsa)(nonce_point, p);
+        API_NS(point_destroy)(p);
+        API_NS(scalar_destroy)(nonce_scalar_2);
+    }
+
+    {
+        uint8_t challenge[2*GOLDILOCKS_EDDSA_448_PRIVATE_BYTES];
+        /* Compute the challenge */
+        hash_init_with_dom(hash,prehashed,0,context,context_len);
+        hash_update(hash,nonce_point,sizeof(nonce_point));
+        hash_update(hash,pubkey,GOLDILOCKS_EDDSA_448_PUBLIC_BYTES);
+        hash_update(hash,message,message_len);
+        hash_final(hash,challenge,sizeof(challenge));
+        hash_destroy(hash);
+        API_NS(scalar_decode_long)(challenge_scalar,challenge,sizeof(challenge));
+        goldilocks_bzero(challenge,sizeof(challenge));
+    }
+
+    API_NS(scalar_mul)(challenge_scalar,challenge_scalar,secret_scalar);
+    API_NS(scalar_add)(challenge_scalar,challenge_scalar,nonce_scalar);
+
+    goldilocks_bzero(signature,GOLDILOCKS_EDDSA_448_SIGNATURE_BYTES);
+    // Writes first part of signature
+    memcpy(signature,nonce_point,sizeof(nonce_point));
+    // Writes second part of signature
+    API_NS(scalar_encode)(&signature[GOLDILOCKS_EDDSA_448_PUBLIC_BYTES],challenge_scalar);
+
+    API_NS(scalar_destroy)(secret_scalar);
+    API_NS(scalar_destroy)(nonce_scalar);
+    API_NS(scalar_destroy)(challenge_scalar);
+}
+
+
+// =========================================================================
+// Public key by secretkey
+// =========================================================================
+
+void goldilocks_ed448_derive_public_key_from_secretkey (
+    uint8_t pubkey[GOLDILOCKS_EDDSA_448_PUBLIC_BYTES],
+    const uint8_t secretkey[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES]
+) {
+    API_NS(scalar_p) secret_scalar;
+    API_NS(point_p) p;
+
+    unsigned int c;
+
+    // Deserialize secretKey and write as scalar
+    API_NS(scalar_decode_long)(secret_scalar, secretkey, GOLDILOCKS_EDDSA_448_PRIVATE_BYTES);
+
+    // Divide by 4 (cofactor)
+    for (c=1; c < GOLDILOCKS_448_EDDSA_ENCODE_RATIO; c <<= 1) {
+        API_NS(scalar_halve)(secret_scalar,secret_scalar);
+    }
+
+    // Calculates point on Ed448: [secret_scalar]B
+    API_NS(precomputed_scalarmul)(p,API_NS(precomputed_base),secret_scalar);
+
+    // Serialize it as publicKey
+    API_NS(point_mul_by_ratio_and_encode_like_eddsa)(pubkey, p);
+
+    /* Cleanup */
+    API_NS(scalar_destroy)(secret_scalar);
+    API_NS(point_destroy)(p);
+}
+
+// =========================================================================
+// Add two secretkeys
+// =========================================================================
+
+void goldilocks_ed448_add_two_secretkeys (
+    uint8_t pubkey[GOLDILOCKS_EDDSA_448_PUBLIC_BYTES],
+    const uint8_t secretkey[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES],
+    const uint8_t secretkey2[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES]
+) {
+    API_NS(scalar_p) secret_scalar;
+    API_NS(point_p) p;
+    API_NS(point_p) p2;
+
+    unsigned int c;
+
+// Calculate the 1 point
+
+    API_NS(scalar_decode_long)(secret_scalar, secretkey, GOLDILOCKS_EDDSA_448_PRIVATE_BYTES);
+
+    for (c=1; c < GOLDILOCKS_448_EDDSA_ENCODE_RATIO; c <<= 1) {
+        API_NS(scalar_halve)(secret_scalar,secret_scalar);
+    }
+
+    API_NS(precomputed_scalarmul)(p,API_NS(precomputed_base),secret_scalar);
+
+// Calculate the 2 point
+
+    API_NS(scalar_decode_long)(secret_scalar, secretkey2, GOLDILOCKS_EDDSA_448_PRIVATE_BYTES);
+
+    for (c=1; c < GOLDILOCKS_448_EDDSA_ENCODE_RATIO; c <<= 1) {
+        API_NS(scalar_halve)(secret_scalar,secret_scalar);
+    }
+
+    API_NS(precomputed_scalarmul)(p2,API_NS(precomputed_base),secret_scalar);
+
+// Add 2 points and serealize the result
+
+    API_NS(point_add) (p, p, p2);
+
+    API_NS(point_mul_by_ratio_and_encode_like_eddsa)(pubkey, p);
+
+    /* Cleanup */
+    API_NS(scalar_destroy)(secret_scalar);
+    API_NS(point_destroy)(p);
+    API_NS(point_destroy)(p2);
+}
+
+
+
