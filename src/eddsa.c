@@ -474,51 +474,40 @@ void goldilocks_ed448_derive_public_key_from_secretkey (
 }
 
 // =========================================================================
-// Add two secretkeys
+// Add two public keys
 // =========================================================================
 
-void goldilocks_ed448_add_two_secretkeys (
+void goldilocks_ed448_add_two_publickeys (
     uint8_t pubkey[GOLDILOCKS_EDDSA_448_PUBLIC_BYTES],
-    const uint8_t secretkey[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES],
-    const uint8_t secretkey2[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES]
+    const uint8_t publickey1[GOLDILOCKS_EDDSA_448_PUBLIC_BYTES],
+    const uint8_t publickey2[GOLDILOCKS_EDDSA_448_PUBLIC_BYTES]
 ) {
-    API_NS(scalar_p) secret_scalar;
-    API_NS(point_p) p;
+    API_NS(scalar_p) s;
+    API_NS(point_p) p1;
     API_NS(point_p) p2;
 
-    unsigned int c;
+// Deserialize the 1 point
 
-// Calculate the 1 point
+    API_NS(point_decode_like_eddsa_and_mul_by_ratio) (p1, publickey1);
 
-    API_NS(scalar_decode_long)(secret_scalar, secretkey, GOLDILOCKS_EDDSA_448_PRIVATE_BYTES);
+// Deserialize the 2 point
 
-    for (c=1; c < GOLDILOCKS_448_EDDSA_ENCODE_RATIO; c <<= 1) {
-        API_NS(scalar_halve)(secret_scalar,secret_scalar);
-    }
-
-    API_NS(precomputed_scalarmul)(p,API_NS(precomputed_base),secret_scalar);
-
-// Calculate the 2 point
-
-    API_NS(scalar_decode_long)(secret_scalar, secretkey2, GOLDILOCKS_EDDSA_448_PRIVATE_BYTES);
-
-    for (c=1; c < GOLDILOCKS_448_EDDSA_ENCODE_RATIO; c <<= 1) {
-        API_NS(scalar_halve)(secret_scalar,secret_scalar);
-    }
-
-    API_NS(precomputed_scalarmul)(p2,API_NS(precomputed_base),secret_scalar);
+    API_NS(point_decode_like_eddsa_and_mul_by_ratio) (p2, publickey2);
 
 // Add 2 points and serealize the result
 
-    API_NS(point_add) (p, p, p2);
+    API_NS(point_add) (p1, p1, p2);
 
-    API_NS(point_mul_by_ratio_and_encode_like_eddsa)(pubkey, p);
+    API_NS(scalar_halve)(s, API_NS(scalar_one));
+    API_NS(scalar_halve)(s, s);
+    API_NS(point_scalarmul) (p1, p1, s);
+
+
+    API_NS(point_mul_by_ratio_and_encode_like_eddsa)(pubkey, p1);
 
     /* Cleanup */
-    API_NS(scalar_destroy)(secret_scalar);
-    API_NS(point_destroy)(p);
+    API_NS(point_destroy)(p1);
     API_NS(point_destroy)(p2);
+    API_NS(scalar_destroy)(s);
 }
-
-
 

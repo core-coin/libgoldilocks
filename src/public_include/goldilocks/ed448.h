@@ -282,10 +282,10 @@ void goldilocks_ed448_derive_public_key_from_secretkey (
     const uint8_t secretkey[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES]
 ) GOLDILOCKS_API_VIS GOLDILOCKS_NONNULL GOLDILOCKS_NOINLINE;
 
-void goldilocks_ed448_add_two_secretkeys (
+void goldilocks_ed448_add_two_publickeys (
     uint8_t pubkey[GOLDILOCKS_EDDSA_448_PUBLIC_BYTES],
-    const uint8_t secretkey[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES],
-    const uint8_t secretkey2[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES]
+    const uint8_t publickey1[GOLDILOCKS_EDDSA_448_PUBLIC_BYTES],
+    const uint8_t publickey2[GOLDILOCKS_EDDSA_448_PUBLIC_BYTES]
 ) GOLDILOCKS_API_VIS GOLDILOCKS_NONNULL GOLDILOCKS_NOINLINE; 
 
 #ifdef __cplusplus
