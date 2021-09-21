@@ -336,21 +336,15 @@ void goldilocks_ed448_private_to_secretkey (
     uint8_t secretkey[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES],
     const uint8_t privkey[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES]
 ) {
-
     {
         // Hash (SHAKE256) the privateKey and write first half to secretKey
-
         hash_hash(
             secretkey,
             GOLDILOCKS_EDDSA_448_PRIVATE_BYTES,
             privkey,
             GOLDILOCKS_EDDSA_448_PRIVATE_BYTES
         );
-
-// Sets bits due to EdDSA standard
-
-        clamp(secretkey);
-
+        secretkey[GOLDILOCKS_EDDSA_448_PRIVATE_BYTES - 1] |= 0x80;
     }
 }
 
