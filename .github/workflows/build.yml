@@ -57,7 +57,7 @@ jobs:
       with:
         upload_url: ${{ env.url }}
         asset_path: libgoldilocks-${{env.RUNNER_OS}}-${{env.arch}}.zip
-        asset_name: libgoldilocks-${{env.RUNNER_OS}}-${{emv.arch}}.zip
+        asset_name: libgoldilocks-${{env.RUNNER_OS}}-${{env.arch}}.zip
         asset_content_type: application/zip
    build:
     runs-on: macos-private
@@ -80,5 +80,5 @@ jobs:
       with:
         upload_url: ${{ env.url }}
         asset_path: libgoldilocks-${{env.RUNNER_OS}}-${{env.arch}}.zip
-        asset_name: libgoldilocks-${{env.RUNNER_OS}}-${{emv.arch}}.zip
+        asset_name: libgoldilocks-${{env.RUNNER_OS}}-${{env.arch}}.zip
         asset_content_type: application/zip
