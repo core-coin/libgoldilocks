@@ -1,47 +1,11 @@
 name: libgoldilocks pipeline
 on: push
 jobs:
-  alpine:
-    runs-on: ubuntu-latest
-    container: alpine:3
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v1
-    - name: Build
-      run: |
-        apk add automake autoconf libtool make gcc g++
-        autoreconf --install
-        ./configure
-        make all
-        uname -m
-        echo "arch=$(uname -m)" >> $GITHUB_ENV
-    - uses: actions/upload-artifact@v2
-      with:
-        name: libgoldilocks-${{ env.arch }}
-        path: src/.libs/libgoldilocks.a
-  build:
-    runs-on: macos-private
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v1
-    - name: Build
-      run: |
-        brew install automake
-        autoreconf --install
-        ./configure
-        make all
-        echo "arch=$(uname -m)" >> $GITHUB_ENV
-    - uses: actions/upload-artifact@v2
-      with:
-        name: libgoldilocks-${{ env.arch }}
-        path: src/.libs/libgoldilocks.a
   relese:
     runs-on: ubuntu-latest
     needs: [alpine, build]
     if: github.event_name == 'push' && github.ref == 'refs/heads/master'
     steps:
-    - name: Zip
-      run: zip -r -j libgoldilocks build/lib
     - name: Bump version
       id: version_bump
       uses: anothrNick/github-tag-action@1.13.0
@@ -59,12 +23,62 @@ jobs:
         release_name: Release libgoldilocks ${{ steps.version_bump.outputs.tag }}
         draft: false
         prerelease: false
+    - name: Release URL
+      run: cat ${{ steps.create_release.outputs.upload_url }} > release.url
+    - name: Upload artifact
+      uses: actions/upload-artifact
+      with:
+        name: release
+        path: release.url    
+  alpine:
+    runs-on: ubuntu-latest
+    container: alpine:3
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Prepare
+      uses: actions/download-artifact
+      with:
+        name: release
+        path: release.url
+    - name: Build
+      run: |
+        apk add automake autoconf libtool make gcc g++
+        autoreconf --install
+        ./configure
+        make all
+        echo "arch=$(uname -m)" >> $GITHUB_ENV
+        echo "url=$(cat release.url)" >> $GITHUB_ENV
+        zip -r -j libgoldilocks-${{ env.RUNNER_OS}}-${{ env.arh}} src/.libs
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: libgoldilocks.zip
-        asset_name: libgoldilocks.zip
+        upload_url: ${{ env.url }}
+        asset_path: libgoldilocks-${{env.RUNNER_OS}}-${{env.arch}}.zip
+        asset_name: libgoldilocks-${{env.RUNNER_OS}}-${{emv.arch}}.zip
+        asset_content_type: application/zip
+   build:
+    runs-on: macos-private
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Build
+      run: |
+        brew install automake
+        autoreconf --install
+        ./configure
+        make all
+        echo "arch=$(uname -m)" >> $GITHUB_ENV
+        echo "url=$(cat release.url)" >> $GITHUB_ENV
+        zip -r -j libgoldilocks-${{ env.RUNNER_OS}}-${{ env.arh}} src/.libs
+   - name: Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ env.url }}
+        asset_path: libgoldilocks-${{env.RUNNER_OS}}-${{env.arch}}.zip
+        asset_name: libgoldilocks-${{env.RUNNER_OS}}-${{emv.arch}}.zip
         asset_content_type: application/zip
