@@ -1,8 +1,8 @@
 name: libgoldilocks pipeline
 on: push
 jobs:
-  linux-docker:
-    runs-on: ubuntu-latest
+  alpine:
+    runs-on: [ubuntu-latest, raspbian-private]
     container: alpine:3
     steps:
     - name: Checkout
@@ -16,7 +16,7 @@ jobs:
       with:
         name: libgoldilocks-${{runner.os}}
         path: src/.libs/libgoldilocks.a
-  make-build:
+  macos:
     runs-on: macos-private
     steps:
     - name: Checkout
@@ -30,9 +30,9 @@ jobs:
       with:
         name: libgoldilocks-${{runner.os}}
         path: src/.libs/libgoldilocks.a
-  create-release:
+  release:
     runs-on: ubuntu-latest
-    needs: [linux-docker, make-build]
+    needs: [alpine, macos]
     steps:
     - name: Checkout
       uses: actions/checkout@v1
