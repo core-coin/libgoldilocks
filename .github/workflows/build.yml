@@ -48,7 +48,7 @@ jobs:
         path: src/.libs/libgoldilocks.a
     - name: Create zip
       run: |
-        zip -r -j libgoldilocks . -i libgoldilocks-*
+        tar -zcvf libgoldilocks.tar.gz libgoldilocks-*
     - name: Fetch tag
       run: |
         echo "branch=${GITHUB_REF##*/}" >> $GITHUB_ENV
