@@ -17,7 +17,6 @@ jobs:
         make lib
     - uses: actions/upload-artifact@v2
       with:
-        platform: 
         name: libgoldilocks-${{ env.platform }} 
         path: src/.libs/libgoldilocks.a
   build:
