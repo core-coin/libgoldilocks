@@ -25,7 +25,7 @@ jobs:
     steps:
     - uses: actions/download-artifact@v2
       with:
-        name: libgoldilocs-${{ env.arch }}
+        name: libgoldilocks-x86_64
         path: libgoldilocks
     - name: List
       run: ls -al
