@@ -26,7 +26,7 @@ jobs:
     - name: Release URL
       run: cat ${{ steps.create_release.outputs.upload_url }} > release.url
     - name: Upload artifact
-      uses: actions/upload-artifact
+      uses: actions/upload-artifact@v2
       with:
         name: release
         path: release.url    
@@ -37,16 +37,14 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
     - name: Prepare
-      uses: actions/download-artifact
+      uses: actions/download-artifact@v2
       with:
         name: release
         path: release.url
     - name: Build
       run: |
         apk add automake autoconf libtool make gcc g++
-        autoreconf --install
-        ./configure
-        make all
+        autoreconf --install && ./configure && make all
         echo "arch=$(uname -m)" >> $GITHUB_ENV
         echo "url=$(cat release.url)" >> $GITHUB_ENV
         zip -r -j libgoldilocks-${{ env.RUNNER_OS}}-${{ env.arh}} src/.libs
@@ -56,20 +54,18 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ env.url }}
-        asset_path: libgoldilocks-${{env.RUNNER_OS}}-${{env.arch}}.zip
-        asset_name: libgoldilocks-${{env.RUNNER_OS}}-${{env.arch}}.zip
+        asset_path: libgoldilocks-${{ env.RUNNER_OS }}-${{ env.arch }}.zip
+        asset_name: libgoldilocks-${{ env.RUNNER_OS }}-${{ env.arch }}.zip
         asset_content_type: application/zip
-   build:
+  build:
     runs-on: macos-private
     steps:
     - name: Checkout
       uses: actions/checkout@v1
     - name: Build
       run: |
-        brew install automake
-        autoreconf --install
-        ./configure
-        make all
+        brew install automake libtool
+        autoreconf --install && ./configure && make all
         echo "arch=$(uname -m)" >> $GITHUB_ENV
         echo "url=$(cat release.url)" >> $GITHUB_ENV
         zip -r -j libgoldilocks-${{ env.RUNNER_OS}}-${{ env.arh}} src/.libs
