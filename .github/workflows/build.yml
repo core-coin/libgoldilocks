@@ -1,9 +1,8 @@
 name: libgoldilocks pipeline
 on: push
 jobs:
-  relese:
+  release:
     runs-on: ubuntu-latest
-    needs: [alpine, build]
     steps:
     - name: Bump version
       id: version_bump
