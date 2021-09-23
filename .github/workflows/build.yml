@@ -2,7 +2,7 @@ name: libgoldilocks pipeline
 on: push
 jobs:
   alpine:
-    runs-on: ubuntu-latest
+    runs-on: [raspbian-private, ubuntu-latest]
     container: alpine:3
     steps:
     - name: Checkout
@@ -19,19 +19,8 @@ jobs:
       with:
         name: libgoldilocks-${{ env.arch }}
         path: src/.libs/libgoldilocks.a
-  test:
-    runs-on: macos-11
-    needs: alpine
-    steps:
-    - uses: actions/download-artifact@v2
-      with:
-        name: libgoldilocks-x86_64
-        path: libgoldilocks-x86_64
-    - name: List
-      run: cd libgoldilocks-x86_64 && ls -al
   build:
     runs-on: [macos-11, windows-latest]
-    if: false
     steps:
     - name: Checkout
       uses: actions/checkout@v1
@@ -40,13 +29,19 @@ jobs:
         autoreconf --install
         ./configure
         make all
-    - name: Test
-      run: make test
+        echo "arch=$(uname -m)" >> $GITHUB_ENV
+    - uses: actions/upload-artifact@v2
+      with:
+        name: libgoldilocks-${{ env.arch }}
+        path: src/.libs/libgoldilocks.a
+  relese:
+    runs-on: ubuntu-latest
+    needs: [alpine, build]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/master'
+    steps:
     - name: Zip
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       run: zip -r -j libgoldilocks build/lib
     - name: Bump version
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       id: version_bump
       uses: anothrNick/github-tag-action@1.13.0
       env:
@@ -54,7 +49,6 @@ jobs:
         DEFAULT_BUMP: "patch"
         RELEASE_BRANCHES: "master"
     - name: Create Release
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -65,7 +59,6 @@ jobs:
         draft: false
         prerelease: false
     - name: Upload Release Asset
-      if: github.event_name == 'push' && github.ref == 'refs/heads/master'
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
