@@ -2,7 +2,7 @@ name: libgoldilocks pipeline
 on: push
 jobs:
   alpine:
-    runs-on: [raspbian-private, ubuntu-latest]
+    runs-on: ubuntu-latest
     container: alpine:3
     steps:
     - name: Checkout
@@ -20,7 +20,7 @@ jobs:
         name: libgoldilocks-${{ env.arch }}
         path: src/.libs/libgoldilocks.a
   build:
-    runs-on: [macos-11, windows-latest]
+    runs-on: macos-11
     steps:
     - name: Checkout
       uses: actions/checkout@v1
