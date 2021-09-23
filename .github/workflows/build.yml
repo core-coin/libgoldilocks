@@ -1,15 +1,58 @@
 name: libgoldilocks pipeline
 on: push
 jobs:
-  release:
+  linux-docker:
+    runs-on: ubuntu-latest
+    needs: release
+    container: alpine:3
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Build
+      run: |
+        apk add automake autoconf libtool make gcc g++
+        autoreconf --install && ./configure && make all
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: libgoldilocks-${{runner.os}}
+        path: src/.libs/libgoldilocks.a
+  make-build:
+    runs-on: macos-private
+    needs: release
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Build
+      run: |
+        brew install automake libtool
+        autoreconf --install && ./configure && make all
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: libgoldilocks-${{runner.os}}
+        path: src/.libs/libgoldilocks.a
+  create-release:
     runs-on: ubuntu-latest
     steps:
     - name: Checkout
       uses: actions/checkout@v1
-    - name: Tag
+    - name: Download Linux artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: libgoldilocks-Linux
+        path: src/.libs/libgoldilocks.a
+    - name: Download Mac artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: libgoldilocks-Mac
+        path: src/.libs/libgoldilocks.a
+    - name: Create zip
+      run: |
+        zip -r -j libgoldilocks libgoldilocks-*
+    - name: Fetch tag
       run: |
         echo "branch=${GITHUB_REF##*/}" >> $GITHUB_ENV
-        echo "testing" > release.url    
     - name: Bump version
       id: version_bump
       uses: anothrNick/github-tag-action@1.13.0
@@ -17,7 +60,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BUMP: "patch"
         RELEASE_BRANCHES: ${{ env.branch }}
-    - name: Create Release
+    - name: Create release
       id: create_release
       uses: actions/create-release@v1
       env:
@@ -27,67 +70,12 @@ jobs:
         release_name: libgoldilocks release ${{ steps.version_bump.outputs.tag }}
         draft: false
         prerelease: false
-    - name: Upload Release Asset
+    - name: Upload release assets
       uses: actions/upload-release-asset@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: release.url
-        asset_name: release.url
-        asset_content_type: application/zip
-  alpine:
-    runs-on: ubuntu-latest
-    needs: release
-    container: alpine:3
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v1
-    - name: Prepare
-      uses: actions/download-artifact@v2
-      with:
-        name: release
-        path: release
-    - name: Build
-      run: |
-        apk add automake autoconf libtool make gcc g++ zip
-        autoreconf --install && ./configure && make all
-        echo "url=$(cat release/release.url)" >> $GITHUB_ENV
-        zip -r -j libgoldilocks-${{runner.os}} src/.libs
-        ls -al .
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ env.url }}
-        asset_path: libgoldilocks-${{runner.os}}.zip
-        asset_name: libgoldilocks-${{runner.os}}.zip
-        asset_content_type: application/zip
-  build:
-    runs-on: macos-private
-    needs: release
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v1
-    - name: Prepare
-      uses: actions/download-artifact@v2
-      with:
-        name: release
-        path: release
-    - name: Build
-      run: |
-        brew install automake libtool
-        autoreconf --install && ./configure && make all
-        zip -r -j libgoldilocks-macos src/.libs
-        echo "url=$(cat release/release.url)" >> $GITHUB_ENV
-        ls -al .
-    - name: Upload Release Asset
-      uses: actions/upload-release-asset@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        upload_url: ${{ env.url }}
-        asset_path: libgoldilocks-macos.zip
-        asset_name: libgoldilocks-macos.zip
+        asset_path: libgoldilocks.zip
+        asset_name: libgoldilocks.zip
         asset_content_type: application/zip
