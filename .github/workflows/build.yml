@@ -4,8 +4,6 @@ jobs:
   alpine:
     runs-on: ubuntu-latest
     container: alpine:3
-    env:
-        platform: $(uname -m)
     steps:
     - name: Checkout
       uses: actions/checkout@v1
@@ -15,15 +13,16 @@ jobs:
         autoreconf --install
         ./configure
         make all
-    - name: List
-      run: |
-        ls -al .
-        ls -al src
-        ls -al src/.libs
+        echo "arch=$(uname -p)" >> $GITHUB_ENV
     - uses: actions/upload-artifact@v2
       with:
-        name: libgoldilocks-${{ env.platform }} 
+        name: libgoldilocks-${{ env.arch }}
         path: src/.libs/libgoldilocks.a
+  test:
+    runs-on: macos-11
+    steps:
+    - name: Test
+      run: echo "test"
   build:
     runs-on: [macos-11, windows-latest]
     if: false
@@ -34,7 +33,7 @@ jobs:
       run: |
         autoreconf --install
         ./configure
-        make lib
+        make all
     - name: Test
       run: make test
     - name: Zip
