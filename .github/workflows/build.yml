@@ -13,6 +13,7 @@ jobs:
         autoreconf --install
         ./configure
         make all
+        uname -p
         echo "arch=$(uname -p)" >> $GITHUB_ENV
     - uses: actions/upload-artifact@v2
       with:
@@ -20,6 +21,7 @@ jobs:
         path: src/.libs/libgoldilocks.a
   test:
     runs-on: macos-11
+    needs: alpine
     steps:
     - name: Test
       run: echo "test"
