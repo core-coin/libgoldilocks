@@ -26,7 +26,9 @@ jobs:
         draft: false
         prerelease: false
     - name: Release URL
-      run: echo ${{ steps.create_release.outputs.upload_url }} > release.url
+      run: |
+        echo ${{ steps.create_release.outputs.upload_url }} > release.url
+        cat release.url
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
@@ -50,6 +52,7 @@ jobs:
         autoreconf --install && ./configure && make all
         echo "url=$(cat release/release.url)" >> $GITHUB_ENV
         zip -r -j libgoldilocks-${{runner.os}} src/.libs
+        ls -al .
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
@@ -76,6 +79,7 @@ jobs:
         autoreconf --install && ./configure && make all
         zip -r -j libgoldilocks-macos src/.libs
         echo "url=$(cat release/release.url)" >> $GITHUB_ENV
+        ls -al .
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
