@@ -20,7 +20,7 @@ jobs:
         name: libgoldilocks-${{ env.arch }}
         path: src/.libs/libgoldilocks.a
   build:
-    runs-on: macos-11
+    runs-on: macos-private
     steps:
     - name: Checkout
       uses: actions/checkout@v1
