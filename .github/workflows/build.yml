@@ -2,7 +2,7 @@ name: libgoldilocks pipeline
 on: push
 jobs:
   alpine:
-    runs-on: [raspbian-private, ubuntu-latest]
+    runs-on: ubuntu-latest
     container: alpine:3
     steps:
     - name: Checkout
