@@ -2,7 +2,7 @@ name: libgoldilocks pipeline
 on: push
 jobs:
   alpine:
-    runs-on: ubuntu-latest
+    runs-on: [raspbian-private, ubuntu-latest]
     container: alpine:3
     steps:
     - name: Checkout
@@ -26,9 +26,9 @@ jobs:
     - uses: actions/download-artifact@v2
       with:
         name: libgoldilocks-x86_64
-        path: libgoldilocks
+        path: libgoldilocks-x86_64
     - name: List
-      run: ls -al
+      run: cd libgoldilocks-x86_64 && ls -al
   build:
     runs-on: [macos-11, windows-latest]
     if: false
