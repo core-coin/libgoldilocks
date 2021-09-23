@@ -16,6 +16,7 @@ jobs:
         ./configure
         make lib
     - name: List
+      run: |
         ls -al src
         ls -al src/.libs
     - uses: actions/upload-artifact@v2
