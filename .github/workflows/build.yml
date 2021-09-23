@@ -7,7 +7,9 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
     - name: Tag
-      run: echo "branch=${GITHUB_REF##*/}" >> $GITHUB_ENV
+      run: |
+        echo "branch=${GITHUB_REF##*/}" >> $GITHUB_ENV
+        echo "testing" > relase.url    
     - name: Bump version
       id: version_bump
       uses: anothrNick/github-tag-action@1.13.0
@@ -25,9 +27,6 @@ jobs:
         release_name: libgoldilocks release ${{ steps.version_bump.outputs.tag }}
         draft: false
         prerelease: false
-    - name: URL
-      run: |
-        echo "url=$(cat release.url)" >> $GITHUB_ENV
     - name: Upload Release Asset
       uses: actions/upload-release-asset@v1
       env:
