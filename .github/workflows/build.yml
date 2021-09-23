@@ -44,7 +44,7 @@ jobs:
     - name: Download Mac artifact
       uses: actions/download-artifact@v2
       with:
-        name: libgoldilocks-Mac
+        name: libgoldilocks-macOS
         path: src/.libs/libgoldilocks.a
     - name: Create zip
       run: |
