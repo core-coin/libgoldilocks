@@ -1,8 +1,27 @@
 name: libgoldilocks pipeline
-on: [push, pull_request]
+on: push
 jobs:
+  alpine:
+    runs-on: [ubuntu-latest, raspbian-private]
+    image: alpine:3
+    env:
+        platform: uname -m
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v1
+    - name: Build
+      run: |
+        autoreconf --install
+        ./configure
+        make lib
+    - uses: actions/upload-artifact@v2
+      with:
+        platform: 
+        name: libgoldilocks-${{ env.platform }} 
+        path: src/.libs/libgoldilocks.a
   build:
-    runs-on: ubuntu-latest
+    runs-on: [macos-11, windows-latest]
+    if: false
     steps:
     - name: Checkout
       uses: actions/checkout@v1
