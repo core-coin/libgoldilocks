@@ -9,7 +9,7 @@ jobs:
     - name: Tag
       run: |
         echo "branch=${GITHUB_REF##*/}" >> $GITHUB_ENV
-        echo "testing" > relase.url    
+        echo "testing" > release.url    
     - name: Bump version
       id: version_bump
       uses: anothrNick/github-tag-action@1.13.0
