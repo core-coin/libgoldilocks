@@ -14,9 +14,10 @@ jobs:
         apk add automake autoconf libtool make gcc g++
         autoreconf --install
         ./configure
-        make lib
+        make all
     - name: List
       run: |
+        ls -al .
         ls -al src
         ls -al src/.libs
     - uses: actions/upload-artifact@v2
