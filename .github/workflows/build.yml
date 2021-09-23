@@ -26,7 +26,7 @@ jobs:
         draft: false
         prerelease: false
     - name: Release URL
-      run: cat ${{ steps.create_release.outputs.upload_url }} > release.url
+      run: echo ${{ steps.create_release.outputs.upload_url }} > release.url
     - name: Upload artifact
       uses: actions/upload-artifact@v2
       with:
