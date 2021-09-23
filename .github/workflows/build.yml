@@ -15,6 +15,9 @@ jobs:
         autoreconf --install
         ./configure
         make lib
+    - name: List
+        ls -al src
+        ls -al src/.libs
     - uses: actions/upload-artifact@v2
       with:
         name: libgoldilocks-${{ env.platform }} 
