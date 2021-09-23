@@ -2,7 +2,10 @@ name: libgoldilocks pipeline
 on: push
 jobs:
   alpine:
-    runs-on: [ubuntu-latest, raspbian-private]
+    strategy:
+      matrix:
+        platform: [ubuntu-latest, raspbian-private]
+    runs-on: ${{ matrix.platform }}
     container: alpine:3
     steps:
     - name: Checkout
@@ -14,7 +17,7 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
-        name: libgoldilocks-${{runner.os}}
+        name: libgoldilocks-${{matrix.platform}}
         path: src/.libs/libgoldilocks.a
   macos:
     runs-on: macos-private
@@ -39,8 +42,13 @@ jobs:
     - name: Download Linux artifact
       uses: actions/download-artifact@v2
       with:
-        name: libgoldilocks-Linux
-        path: libgoldilocks-Linux
+        name: libgoldilocks-ubuntu-latest
+        path: libgoldilocks-ubuntu-latest
+    - name: Download Mac artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: libgoldilocks-raspbian-latest
+        path: libgoldilocks-raspbian-latest
     - name: Download Mac artifact
       uses: actions/download-artifact@v2
       with:
