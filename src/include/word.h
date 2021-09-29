@@ -6,6 +6,10 @@
 #ifndef __WORD_H__
 #define __WORD_H__
 
+#ifdef __MINGW32__
+#define posix_memalign(p, a, s) (((*(p)) = _aligned_malloc((s), (a))), *(p) ?0 :errno)
+#endif
+
 /* for posix_memalign */
 #define _XOPEN_SOURCE 600
 #define __STDC_WANT_LIB_EXT1__ 1 /* for memset_s */
