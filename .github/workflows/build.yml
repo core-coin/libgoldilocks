@@ -14,16 +14,17 @@ jobs:
       run: |
         docker build . -t libgoldilocks:${{matrix.platform}}
         docker create -it --name dummy libgoldilocks:${{matrix.platform}} bash
-        docker cp dummy:/usr/local/bin/libgoldilocks.a .
+        docker cp dummy:/usr/local/bin/libgoldilocks.a src/.libs/libgoldilocks.a
         docker rm -f dummy
     - name: Build Mac
       if: ${{ matrix.platform == 'macos-private' }}
-      run: autoreconf --install && ./configure && make all
+      run: |
+        autoreconf --install && ./configure && make all
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: libgoldilocks-${{matrix.platform}}
-        path: libgoldilocks.a
+        path: src/.libs/libgoldilocks.a
   release:
     runs-on: ubuntu-latest
     needs: build
@@ -40,6 +41,11 @@ jobs:
       with:
         name: libgoldilocks-raspbian-private
         path: libgoldilocks-raspbian-private
+    - name: Download Mac artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: libgoldilocks-macos-private
+        path: libgoldilocks-macos-private
     - name: Create zip
       run: |
         zip -r libgoldilocks libgoldilocks-*
