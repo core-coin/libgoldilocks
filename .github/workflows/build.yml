@@ -10,7 +10,7 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
     - name: Build Linux
-      if: ${{ matrix.platform == 'ubuntu-latest' || matrix.platform == 'raspbian-latest'}}
+      if: ${{ matrix.platform == 'ubuntu-latest' || matrix.platform == 'raspbian-private'}}
       run: |
         docker build . -t libgoldilocks:${{matrix.platform}}
         docker create -it --name dummy libgoldilocks:${{matrix.platform}} bash
