@@ -4,17 +4,21 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [ubuntu-latest, raspbian-private,]
+        platform: [ubuntu-latest, raspbian-private, macos-private]
     runs-on: ${{ matrix.platform }}
     steps:
     - name: Checkout
       uses: actions/checkout@v1
-    - name: Build
+    - name: Build Linux
+      if: ${{matrix.platform}} == "ubuntu-latest" || ${{matrix.platform}} == "raspbian-latest"
       run: |
         docker build . -t libgoldilocks:${{matrix.platform}}
         docker create -it --name dummy libgoldilocks:${{matrix.platform}} bash
         docker cp dummy:/usr/local/bin/libgoldilocks.a .
         docker rm -f dummy
+    - name: Build Mac
+      if: ${{matrix.platform}} == "windows-latest"
+      run: autoreconf --install && ./configure && make all
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
