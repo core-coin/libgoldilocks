@@ -21,13 +21,14 @@ jobs:
       if: ${{ matrix.platform == 'macos-private' }}
       run: |
         autoreconf --install && ./configure && make all
-    - name: Setup Windows
+    - uses: msys2/setup-msys2@v2
       if: ${{ matrix.platform == 'windows-latest' }}
-      uses: egor-tensin/setup-mingw@v2
       with:
-        platform: x64
+        msystem: mingw64
+        install: mingw-w64-x86_64-toolchain
     - name: Build Windows
       if: ${{ matrix.platform == 'windows-latest' }}
+      shell: msys2 {0}
       run: |
         pacman -S base-devel
         autoreconf --install && ./configure && make all
