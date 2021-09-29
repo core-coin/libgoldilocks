@@ -20,6 +20,7 @@ jobs:
     - name: Build Mac
       if: ${{ matrix.platform == 'macos-private' }}
       run: |
+        pacman -S base-devel
         autoreconf --install && ./configure && make all
     - name: Setup Windows
       if: ${{ matrix.platform == 'windows-latest' }}
