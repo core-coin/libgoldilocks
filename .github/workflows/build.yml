@@ -4,35 +4,21 @@ jobs:
   alpine:
     strategy:
       matrix:
-        platform: [ubuntu-latest, raspbian-private]
+        platform: [ubuntu-latest, raspbian-private,]
     runs-on: ${{ matrix.platform }}
-    container: alpine:3
     steps:
     - name: Checkout
       uses: actions/checkout@v1
     - name: Build
       run: |
-        apk add automake autoconf libtool make gcc g++
-        autoreconf --install && ./configure && make all
+        docker build . -t libgoldilocks:${{matrix.platform}}
+        docker create -it --name dummy libgoldilocks:ubuntu-latest bash
+        docker cp dummy:/usr/local/bin/libgoldilocks.a .
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
         name: libgoldilocks-${{matrix.platform}}
-        path: src/.libs/libgoldilocks.a
-  macos:
-    runs-on: macos-private
-    steps:
-    - name: Checkout
-      uses: actions/checkout@v1
-    - name: Build
-      run: |
-        brew install automake libtool
-        autoreconf --install && ./configure && make all
-    - name: Upload
-      uses: actions/upload-artifact@v2
-      with:
-        name: libgoldilocks-${{runner.os}}
-        path: src/.libs/libgoldilocks.a
+        path: libgoldilocks.a
   release:
     runs-on: ubuntu-latest
     needs: [alpine, macos]
@@ -49,12 +35,7 @@ jobs:
       with:
         name: libgoldilocks-raspbian-latest
         path: libgoldilocks-raspbian-latest
-    - name: Download Mac artifact
-      uses: actions/download-artifact@v2
-      with:
-        name: libgoldilocks-macOS
-        path: libgoldilocks-macOS
-    - name: Create zip
+   - name: Create zip
       run: |
         zip -r libgoldilocks libgoldilocks-*
     - name: Fetch tag
