@@ -4,7 +4,7 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [ubuntu-latest, raspbian-private, macos-private]
+        platform: [ubuntu-latest, raspbian-private, macos-private, windows-latest]
     runs-on: ${{ matrix.platform }}
     steps:
     - name: Checkout
@@ -20,6 +20,15 @@ jobs:
     - name: Build Mac
       if: ${{ matrix.platform == 'macos-private' }}
       run: |
+        autoreconf --install && ./configure && make all
+    - name: Setup Windows
+      if: ${{ matrix.platform == 'windows-latest' }}
+      uses: egor-tensin/setup-mingw@v2
+      with:
+        platform: x64
+    - name: Build Windows
+      if: ${{ matrix.platform == 'windows-latest' }}
+      run:
         autoreconf --install && ./configure && make all
     - name: Upload
       uses: actions/upload-artifact@v2
