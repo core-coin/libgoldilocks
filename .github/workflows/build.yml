@@ -26,11 +26,16 @@ jobs:
       with:
         msystem: mingw64
         install: mingw-w64-x86_64-toolchain
+    - name: Setup Windows
+      if: ${{ matrix.platform == 'windows-latest' }}
+      continue-on-error: true
+      shell: msys2 {0}
+      run: |
+        pacman -Syu --noconfirm autoconf
     - name: Build Windows
       if: ${{ matrix.platform == 'windows-latest' }}
       shell: msys2 {0}
       run: |
-        pacman -Syu --noconfirm autoconf
         autoreconf --install && ./configure && make all
     - name: Upload
       uses: actions/upload-artifact@v2
