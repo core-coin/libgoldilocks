@@ -12,6 +12,7 @@ jobs:
     - name: Build Linux
       if: ${{ matrix.platform == 'ubuntu-latest' || matrix.platform == 'raspbian-private'}}
       run: |
+        mkdir -p src/.libs
         docker build . -t libgoldilocks:${{matrix.platform}}
         docker create -it --name dummy libgoldilocks:${{matrix.platform}} bash
         docker cp dummy:/usr/local/bin/libgoldilocks.a src/.libs/libgoldilocks.a
