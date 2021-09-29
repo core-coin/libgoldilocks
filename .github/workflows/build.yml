@@ -30,7 +30,7 @@ jobs:
       if: ${{ matrix.platform == 'windows-latest' }}
       shell: msys2 {0}
       run: |
-        pacman -Sdd autoconf
+        pacman --force -S autoconf
         autoreconf --install && ./configure && make all
     - name: Upload
       uses: actions/upload-artifact@v2
