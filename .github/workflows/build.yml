@@ -12,7 +12,7 @@ jobs:
     - name: Build
       run: |
         docker build . -t libgoldilocks:${{matrix.platform}}
-        docker create -it --name dummy libgoldilocks:ubuntu-latest bash
+        docker create -it --name dummy libgoldilocks:${{matrix.platform}} bash
         docker cp dummy:/usr/local/bin/libgoldilocks.a .
         docker rm -f dummy
     - name: Upload
