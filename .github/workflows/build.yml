@@ -46,39 +46,36 @@ jobs:
     steps:
     - name: Checkout
       uses: actions/checkout@v1
-    - name: Download Linux artifact
+    - name: Download Linux lib
       uses: actions/download-artifact@v2
       with:
         name: libgoldilocks-ubuntu-latest
-        path: libgoldilocks-ubuntu-latest
-    - name: Download Raspbian artifact
+        path: linux-x86_64
+    - name: Download Raspbian lib
       uses: actions/download-artifact@v2
       with:
         name: libgoldilocks-raspbian-private
-        path: libgoldilocks-raspbian-private
-    - name: Download Mac artifact
+        path: linux-arm64
+    - name: Download Mac lib
       uses: actions/download-artifact@v2
       with:
         name: libgoldilocks-macos-private
-        path: libgoldilocks-macos-private
-    - name: Download Win artifact
+        path: darwin-x86_64
+    - name: Download Win lib
       uses: actions/download-artifact@v2
       with:
         name: libgoldilocks-windows-latest
-        path: libgoldilocks-windows-latest
+        path: windows-x86_64
     - name: Create zip
       run: |
         zip -r libgoldilocks libgoldilocks-*
-    - name: Fetch tag
-      run: |
-        echo "branch=${GITHUB_REF##*/}" >> $GITHUB_ENV
     - name: Bump version
       id: version_bump
       uses: anothrNick/github-tag-action@1.13.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BUMP: "patch"
-        RELEASE_BRANCHES: ${{ env.branch }}
+        RELEASE_BRANCHES: "master"
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
@@ -86,7 +83,7 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         tag_name: ${{ steps.version_bump.outputs.tag }}
-        release_name: Release libgoldilocks ${{ steps.version_bump.outputs.tag }}
+        release_name: libgoldilocks ${{ steps.version_bump.outputs.tag }}
         draft: false
         prerelease: false
     - name: Upload release assets
