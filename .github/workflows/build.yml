@@ -34,7 +34,7 @@ jobs:
       if: ${{ matrix.platform == 'windows-latest' }}
       shell: msys2 {0}
       run: |
-        autoreconf --install && ./configure && make all
+        autoreconf --install && ./configure && make lib
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
