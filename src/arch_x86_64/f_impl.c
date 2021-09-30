@@ -16,10 +16,10 @@ void gf_mul (gf_s *__restrict__ cs, const gf as, const gf bs) {
 
     /* For some reason clang doesn't vectorize this without prompting? */
     unsigned int i;
-    for (i=0; i<sizeof(aa)/sizeof(uint64xn_t); i++) {
-        ((uint64xn_t*)aa)[i] = ((const uint64xn_t*)a)[i] + ((const uint64xn_t*)(&a[4]))[i];
-        ((uint64xn_t*)bb)[i] = ((const uint64xn_t*)b)[i] + ((const uint64xn_t*)(&b[4]))[i]; 
-        ((uint64xn_t*)bbb)[i] = ((const uint64xn_t*)bb)[i] + ((const uint64xn_t*)(&b[4]))[i];     
+    for (i=0; i<sizeof(aa)/sizeof(uint64_t); i++) {
+        ((uint64_t*)aa)[i] = ((const uint64_t*)a)[i] + ((const uint64_t*)(&a[4]))[i];
+        ((uint64_t*)bb)[i] = ((const uint64_t*)b)[i] + ((const uint64_t*)(&b[4]))[i];
+        ((uint64_t*)bbb)[i] = ((const uint64_t*)bb)[i] + ((const uint64_t*)(&b[4]))[i];
     }
     /*
     for (int i=0; i<4; i++) {
@@ -191,8 +191,8 @@ void gf_sqr (gf_s *__restrict__ cs, const gf as) {
 
     /* For some reason clang doesn't vectorize this without prompting? */
     unsigned int i;
-    for (i=0; i<sizeof(aa)/sizeof(uint64xn_t); i++) {
-      ((uint64xn_t*)aa)[i] = ((const uint64xn_t*)a)[i] + ((const uint64xn_t*)(&a[4]))[i];
+    for (i=0; i<sizeof(aa)/sizeof(uint64_t); i++) {
+      ((uint64_t*)aa)[i] = ((const uint64_t*)a)[i] + ((const uint64_t*)(&a[4]))[i];
     }
 
     accum2  = widemul(&a[0],&a[3]);
