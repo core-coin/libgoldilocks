@@ -1233,10 +1233,17 @@ extern const gf API_NS(precomputed_wnaf_as_fe)[];
 static const niels_p *API_NS(wnaf_base) = (const niels_p *)API_NS(precomputed_wnaf_as_fe);
 const size_t API_NS(sizeof_precomputed_wnafs) = sizeof(niels_p)<<GOLDILOCKS_WNAF_FIXED_TABLE_BITS;
 
+#ifdef __MINGW32__
+void API_NS(precompute_wnafs) (
+    niels_p out[1<<GOLDILOCKS_WNAF_FIXED_TABLE_BITS],
+    const point_p base
+);
+#else
 void API_NS(precompute_wnafs) (
     niels_p out[1<<GOLDILOCKS_WNAF_FIXED_TABLE_BITS],
     const point_p base
 ) __attribute__ ((visibility ("hidden")));
+#endif
 
 void API_NS(precompute_wnafs) (
     niels_p out[1<<GOLDILOCKS_WNAF_FIXED_TABLE_BITS],
