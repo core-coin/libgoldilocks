@@ -30,7 +30,7 @@ jobs:
         install: >
           base-devel
           mingw-w64-x86_64-toolchain
-    - name: Build Win
+    - name: Build Windows
       if: ${{ matrix.platform == 'windows-latest' }}
       shell: msys2 {0}
       run: |
@@ -51,7 +51,7 @@ jobs:
       with:
         name: libgoldilocks-ubuntu-latest
         path: libgoldilocks-ubuntu-latest
-    - name: Download RPi artifact
+    - name: Download Raspbian artifact
       uses: actions/download-artifact@v2
       with:
         name: libgoldilocks-raspbian-private
@@ -61,6 +61,11 @@ jobs:
       with:
         name: libgoldilocks-macos-private
         path: libgoldilocks-macos-private
+    - name: Download Win artifact
+      uses: actions/download-artifact@v2
+      with:
+        name: libgoldilocks-windows-latest
+        path: libgoldilocks-windows-latest
     - name: Create zip
       run: |
         zip -r libgoldilocks libgoldilocks-*
