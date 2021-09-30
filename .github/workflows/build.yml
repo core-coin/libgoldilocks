@@ -4,7 +4,7 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [ubuntu-latest, raspbian-private, macos-private, windows-latest]
+        platform: [ubuntu-latest, windows-latest, raspbian-private, macos-private]
     runs-on: ${{ matrix.platform }}
     steps:
     - name: Checkout
@@ -21,18 +21,16 @@ jobs:
       if: ${{ matrix.platform == 'macos-private' }}
       run: |
         autoreconf --install && ./configure && make all
-    - uses: msys2/setup-msys2@v2
+    - name: Setup Win
       if: ${{ matrix.platform == 'windows-latest' }}
+      uses: msys2/setup-msys2@v2
       with:
         msystem: mingw64
-        install: mingw-w64-x86_64-toolchain
-    - name: Setup Windows
-      if: ${{ matrix.platform == 'windows-latest' }}
-      continue-on-error: true
-      shell: msys2 {0}
-      run: |
-        pacman -Syu --noconfirm base-devel
-    - name: Build Windows
+        update: true
+        install: >
+          base-devel
+          mingw-w64-x86_64-toolchain
+    - name: Build Win
       if: ${{ matrix.platform == 'windows-latest' }}
       shell: msys2 {0}
       run: |
