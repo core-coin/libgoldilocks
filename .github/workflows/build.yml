@@ -42,6 +42,7 @@ jobs:
         path: src/.libs/libgoldilocks.a
   release:
     runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/master'
     needs: build
     steps:
     - name: Checkout
@@ -68,7 +69,7 @@ jobs:
         path: windows-x86_64
     - name: Create zip
       run: |
-        zip -r libgoldilocks libgoldilocks-*
+        zip -r libgoldilocks *
     - name: Bump version
       id: version_bump
       uses: anothrNick/github-tag-action@1.13.0
