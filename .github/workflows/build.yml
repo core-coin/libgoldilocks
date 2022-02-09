@@ -31,6 +31,8 @@ jobs:
         install: >
           base-devel
           autoconf-wrapper
+          autoconf
+          libtool
           mingw-w64-x86_64-toolchain
     - name: Build Windows
       if: ${{ matrix.platform == 'windows-latest' }}
