@@ -21,7 +21,7 @@ jobs:
       if: ${{ matrix.platform == 'macos-latest' }}
       run: |
         brew install automake
-        autoreconf --install && ./configure && make all
+        autoreconf --install && ./configure && make all test
     - name: Setup Win
       if: ${{ matrix.platform == 'windows-latest' }}
       uses: msys2/setup-msys2@v2
@@ -39,7 +39,7 @@ jobs:
       if: ${{ matrix.platform == 'windows-latest' }}
       shell: msys2 {0}
       run: |
-        autoreconf --install && ./configure && make all
+        autoreconf --install && ./configure && make all test
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
