@@ -30,7 +30,7 @@ jobs:
         update: true
         install: >
           base-devel
-          sys-devel
+          autoconf-wrapper
           mingw-w64-x86_64-toolchain
     - name: Build Windows
       if: ${{ matrix.platform == 'windows-latest' }}
