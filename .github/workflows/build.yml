@@ -4,7 +4,7 @@ jobs:
   build:
     strategy:
       matrix:
-        platform: [ubuntu-latest, windows-latest, raspbian-private, macos-private]
+        platform: [ubuntu-latest, windows-latest, raspbian-private, macos-latest]
     runs-on: ${{ matrix.platform }}
     steps:
     - name: Checkout
@@ -18,8 +18,9 @@ jobs:
         docker cp dummy:/usr/local/bin/libgoldilocks.a src/.libs/libgoldilocks.a
         docker rm -f dummy
     - name: Build Mac
-      if: ${{ matrix.platform == 'macos-private' }}
+      if: ${{ matrix.platform == 'macos-latest' }}
       run: |
+        brew install automake
         autoreconf --install && ./configure && make all
     - name: Setup Win
       if: ${{ matrix.platform == 'windows-latest' }}
@@ -29,6 +30,7 @@ jobs:
         update: true
         install: >
           base-devel
+          sys-devel
           mingw-w64-x86_64-toolchain
     - name: Build Windows
       if: ${{ matrix.platform == 'windows-latest' }}
@@ -60,7 +62,7 @@ jobs:
     - name: Download Mac lib
       uses: actions/download-artifact@v2
       with:
-        name: libgoldilocks-macos-private
+        name: libgoldilocks-macos-latest
         path: darwin-x86_64
     - name: Download Win lib
       uses: actions/download-artifact@v2
