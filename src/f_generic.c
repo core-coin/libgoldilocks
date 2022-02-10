@@ -16,7 +16,7 @@ static const gf MODULUS = {FIELD_LITERAL(
 )};
 
 /** Serialize to wire format. */
-void gf_serialize (uint8_t serial[SER_BYTES], const gf x) {
+void gf_serialize (uint8_t *serial, const gf x) {
     gf red;
     unsigned int j, fill;
     dword_t buffer = 0;

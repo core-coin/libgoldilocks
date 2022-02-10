@@ -14,7 +14,7 @@ INCFLAGS += -I$(top_srcdir)/src/include/$(ARCH_NAME)
 OFLAGS ?= -O2
 
 if X86
-ARCHFLAGS = -maes -mavx2 -mbmi2 #TODO
+ARCHFLAGS = -maes #TODO
 else
 ARCHFLAGS = # -mavx2 -mbmi2 #TODO
 endif
