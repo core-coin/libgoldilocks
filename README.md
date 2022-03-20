@@ -49,20 +49,6 @@ $ make test
 * To test the programs: `make test`
 * To generate the main decaf library and its symlinks: `make lib`
 
-## Mailing lists
-
-Because this is new software, please expect it to have bugs, perhaps even
-critical security bugs.  If you are using it, please sign up for updates on
-Mike Hamburg's library (note here that any update that we consider useful for
-this library from libdecaf will be incorporated):
-
-* Security-critical announcements (very low volume):
-    decaf-security@googlegroups.com, join at https://groups.google.com/forum/#!forum/decaf-security
-* New version announcements (low volume):
-    decaf-announce@googlegroups.com, join at https://groups.google.com/forum/#!forum/decaf-annonuce
-* Library discussion (potentially more volume):
-    decaf-discuss@googlegroups.com, join at https://groups.google.com/forum/#!forum/decaf-discuss
-
 ## General elliptic curve operations.
 
 This is a multi-purpose elliptic curve library. There is a C library, and a set

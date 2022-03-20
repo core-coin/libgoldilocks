@@ -4,3 +4,4 @@
 - Cryptography Research, Inc.
 - Sofía Celi
 - Centro de Autonomia Digital Brazil
+- Core Foundation
