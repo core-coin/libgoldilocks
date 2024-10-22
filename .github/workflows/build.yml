@@ -88,27 +88,27 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
     - name: Linux x86_64
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: libgoldilocks-linux-x86_64
         path: linux-x86_64
     - name: Linux arm64
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: libgoldilocks-linux-arm64
         path: linux-arm64
     - name: Darwin x86_64
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: libgoldilocks-darwin-x86_64
         path: darwin-x86_64
     - name: Darwin arm64
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: libgoldilocks-darwin-arm64
         path: darwin-arm64
     - name: Win x86_64
-      uses: actions/download-artifact@v2
+      uses: actions/download-artifact@v3
       with:
         name: libgoldilocks-windows-x86_64
         path: windows-x86_64
