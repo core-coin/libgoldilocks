@@ -1,27 +1,32 @@
 name: libgoldilocks pipeline
 on: push
 jobs:
-  build:
+
+  build-mac:
     strategy:
       matrix:
-        platform: [ubuntu-latest, windows-latest, raspbian-private, macos-latest]
-    runs-on: ${{ matrix.platform }}
+        config:
+          - {os: macos-13, path: darwin-x86_64, arch: x86_64}
+          - {os: macos-latest, path: darwin-arm64, arch: arm64}
+    runs-on: ${{ matrix.config.os }}
     steps:
     - name: Checkout
-      uses: actions/checkout@v1
-    - name: Build Linux
-      if: ${{ matrix.platform == 'ubuntu-latest' || matrix.platform == 'raspbian-private'}}
-      run: |
-        mkdir -p src/.libs
-        docker build . -t libgoldilocks:${{matrix.platform}}
-        docker create -it --name dummy libgoldilocks:${{matrix.platform}} bash
-        docker cp dummy:/usr/local/bin/libgoldilocks.a src/.libs/libgoldilocks.a
-        docker rm -f dummy
-    - name: Build Mac
-      if: ${{ matrix.platform == 'macos-latest' }}
+      uses: actions/checkout@v4
+    - name: Build
       run: |
         brew install automake
         autoreconf --install && ./configure && make all
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: libgoldilocks-darwin-${{ matrix.config.arch }}
+        path: src/.libs/libgoldilocks.a
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
     - name: Setup Win
       if: ${{ matrix.platform == 'windows-latest' }}
       uses: msys2/setup-msys2@v2
@@ -35,7 +40,7 @@ jobs:
           automake
           libtool
           mingw-w64-x86_64-toolchain
-    - name: Build Windows
+    - name: Build
       if: ${{ matrix.platform == 'windows-latest' }}
       shell: msys2 {0}
       run: |
@@ -43,41 +48,77 @@ jobs:
     - name: Upload
       uses: actions/upload-artifact@v2
       with:
-        name: libgoldilocks-${{matrix.platform}}
+        name: libgoldilocks-windows-x86_64
         path: src/.libs/libgoldilocks.a
+
+  build-alpine:
+    strategy:
+      matrix:
+        config:
+          - {arch: x86_64, branch: latest-stable}
+          - {arch: aarch64, branch: latest-stable}
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Setup Alpine Linux
+      uses: jirutka/setup-alpine@v1
+      with:
+        arch: ${{ matrix.config.arch }}
+        branch: ${{ matrix.config.branch }}
+    - name: Install deps
+      shell: alpine.sh --root {0}
+      run: |
+        apk add git cmake gcc g++ make
+    - name: Build & Test
+      shell: alpine.sh --root {0}
+      run: |
+        brew install automake
+        autoreconf --install && ./configure && make all
+    - name: Upload
+      uses: actions/upload-artifact@v2
+      with:
+        name: libgoldilocks-linux-${{ matrix.config.arch }}
+        path: src/.libs/libgoldilocks.a
+
   release:
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/master'
-    needs: build
+    #if: github.ref == 'refs/heads/master'
+    needs: [build-mac, build-windows, build-alpine]
     steps:
     - name: Checkout
       uses: actions/checkout@v1
-    - name: Download Linux lib
+    - name: Linux x86_64
       uses: actions/download-artifact@v2
       with:
-        name: libgoldilocks-ubuntu-latest
+        name: libgoldilocks-linux-x86_64
         path: linux-x86_64
-    - name: Download Raspbian lib
+    - name: Linux arm64
       uses: actions/download-artifact@v2
       with:
-        name: libgoldilocks-raspbian-private
+        name: libgoldilocks-linux-arm64
         path: linux-arm64
-    - name: Download Mac lib
+    - name: Darwin x86_64
       uses: actions/download-artifact@v2
       with:
-        name: libgoldilocks-macos-latest
+        name: libgoldilocks-darwin-x86_64
         path: darwin-x86_64
-    - name: Download Win lib
+    - name: Darwin arm64
       uses: actions/download-artifact@v2
       with:
-        name: libgoldilocks-windows-latest
+        name: libgoldilocks-darwin-arm64
+        path: darwin-arm64
+    - name: Win x86_64
+      uses: actions/download-artifact@v2
+      with:
+        name: libgoldilocks-windows-x86_64
         path: windows-x86_64
     - name: Create zip
       run: |
-        zip -r libgoldilocks linux-x86_64 linux-arm64 darwin-x86_64 windows-x86_64
+        zip -r libgoldilocks linux-x86_64 linux-arm64 darwin-x86_64 darwin-arm64 windows-x86_64
     - name: Bump version
       id: version_bump
-      uses: anothrNick/github-tag-action@1.13.0
+      uses: anothrNick/github-tag-action@1.37.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BUMP: "patch"
