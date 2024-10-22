@@ -32,6 +32,7 @@ jobs:
         msystem: mingw64
         update: true
         install: >
+          base-devel
           autoconf-wrapper
           autoconf
           automake
