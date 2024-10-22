@@ -82,7 +82,7 @@ jobs:
 
   release:
     runs-on: ubuntu-latest
-    #if: github.ref == 'refs/heads/master'
+    if: github.ref == 'refs/heads/master'
     needs: [build-mac, build-windows, build-alpine]
     steps:
     - name: Checkout
@@ -95,7 +95,7 @@ jobs:
     - name: Linux arm64
       uses: actions/download-artifact@v3
       with:
-        name: libgoldilocks-linux-aarch4
+        name: libgoldilocks-linux-aarch64
         path: linux-arm64
     - name: Darwin x86_64
       uses: actions/download-artifact@v3
