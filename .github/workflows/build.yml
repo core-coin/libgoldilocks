@@ -69,7 +69,7 @@ jobs:
     - name: Install deps
       shell: alpine.sh --root {0}
       run: |
-        apk add git cmake gcc g++ make
+        apk add automake autoconf libtool make gcc g++
     - name: Build & Test
       shell: alpine.sh --root {0}
       run: |
