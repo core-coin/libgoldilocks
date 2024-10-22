@@ -95,7 +95,7 @@ jobs:
     - name: Linux arm64
       uses: actions/download-artifact@v3
       with:
-        name: libgoldilocks-linux-arm64
+        name: libgoldilocks-linux-aarch4
         path: linux-arm64
     - name: Darwin x86_64
       uses: actions/download-artifact@v3
