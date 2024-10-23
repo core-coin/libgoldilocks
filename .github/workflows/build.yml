@@ -16,7 +16,7 @@ jobs:
         brew install automake libtool
         autoreconf --install && ./configure && make all
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: libgoldilocks-darwin-${{ matrix.config.arch }}
         path: src/.libs/libgoldilocks.a
@@ -46,7 +46,7 @@ jobs:
       run: |
         autoreconf --install && ./configure && make all
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: libgoldilocks-windows-x86_64
         path: src/.libs/libgoldilocks.a
@@ -75,7 +75,7 @@ jobs:
       run: |
         autoreconf --install && ./configure && make all
     - name: Upload
-      uses: actions/upload-artifact@v3
+      uses: actions/upload-artifact@v4
       with:
         name: libgoldilocks-linux-${{ matrix.config.arch }}
         path: src/.libs/libgoldilocks.a
@@ -88,27 +88,27 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v1
     - name: Linux x86_64
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: libgoldilocks-linux-x86_64
         path: linux-x86_64
     - name: Linux arm64
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: libgoldilocks-linux-aarch64
         path: linux-arm64
     - name: Darwin x86_64
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: libgoldilocks-darwin-x86_64
         path: darwin-x86_64
     - name: Darwin arm64
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: libgoldilocks-darwin-arm64
         path: darwin-arm64
     - name: Win x86_64
-      uses: actions/download-artifact@v3
+      uses: actions/download-artifact@v4
       with:
         name: libgoldilocks-windows-x86_64
         path: windows-x86_64
@@ -117,12 +117,13 @@ jobs:
         zip -r libgoldilocks linux-x86_64 linux-arm64 darwin-x86_64 darwin-arm64 windows-x86_64
     - name: Bump version
       id: version_bump
-      uses: anothrNick/github-tag-action@1.39.0
+      uses: anothrNick/github-tag-action@v1
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BUMP: "patch"
         RELEASE_BRANCHES: "master"
         WITH_V: false
+        PRERELEASE: false
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
