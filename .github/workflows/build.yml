@@ -117,11 +117,12 @@ jobs:
         zip -r libgoldilocks linux-x86_64 linux-arm64 darwin-x86_64 darwin-arm64 windows-x86_64
     - name: Bump version
       id: version_bump
-      uses: anothrNick/github-tag-action@1.37.0
+      uses: anothrNick/github-tag-action@1.39.0
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DEFAULT_BUMP: "patch"
         RELEASE_BRANCHES: "master"
+        WITH_V: false
     - name: Create release
       id: create_release
       uses: actions/create-release@v1
